@@ -1,143 +1,115 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>De moed om het Zwarte Schaap te zijn — AR</title>
-
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>De moed om het Zwarte Schaap te zijn – AR</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-    .a-enter-vr { display: none !important; }
-
-    #startOverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 999999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(0,0,0,0.72);
-      color: #D4AF37;
-      font-family: Georgia, serif;
-      text-align: center;
-    }
-
-    #startButton {
-      border: 1px solid rgba(212,175,55,0.85);
-      border-radius: 999px;
-      background: rgba(0,0,0,0.86);
-      color: #f5d76e;
-      padding: 16px 22px;
-      font-family: Georgia, serif;
-      font-size: 18px;
-      letter-spacing: 0.3px;
-      box-shadow: 0 0 24px rgba(212,175,55,0.35);
-    }
-
-    #hint {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%);
-      z-index: 9999;
-      width: max-content;
-      max-width: 86vw;
-      padding: 10px 14px;
-      border: 1px solid rgba(212,175,55,0.45);
-      border-radius: 999px;
-      background: rgba(0,0,0,0.58);
-      color: #f5d76e;
-      font-family: Georgia, serif;
-      font-size: 13px;
-      text-align: center;
-      pointer-events: none;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: Georgia, serif; }
+    a-scene { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; }
+    #hint { position: fixed; bottom: 40px; left: 0; right: 0; text-align: center; color: #c8a96e; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; z-index: 100; opacity: 0.8; pointer-events: none; }
+    #chapter-label { position: fixed; top: 24px; left: 0; right: 0; text-align: center; color: #c8a96e; font-size: 0.7rem; letter-spacing: 4px; text-transform: uppercase; z-index: 100; opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+    #chapter-label.visible { opacity: 0.9; }
+    #loading-screen { position: fixed; inset: 0; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 1s ease; }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
+    .loading-title { color: #c8a96e; font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; text-align: center; padding: 0 32px; margin-bottom: 8px; }
+    .loading-sub { color: #c8a96e; font-size: 0.65rem; letter-spacing: 3px; opacity: 0.5; margin-bottom: 40px; }
+    #loading-hint { color: #c8a96e; font-size: 0.6rem; letter-spacing: 2px; opacity: 0.5; text-align: center; padding: 0 20px; }
+    #video-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 500; flex-direction: column; align-items: center; justify-content: center; }
+    #video-overlay.active { display: flex; }
+    #fullscreen-video { width: 100vw; height: 100vh; object-fit: cover; }
+    #close-btn { position: fixed; top: 24px; right: 24px; width: 44px; height: 44px; background: rgba(0,0,0,0.6); border: 1px solid #c8a96e88; border-radius: 50%; color: #c8a96e; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 600; }
+    #video-chapter { position: fixed; bottom: 32px; left: 0; right: 0; text-align: center; color: #c8a96e; font-size: 0.65rem; letter-spacing: 4px; text-transform: uppercase; z-index: 600; opacity: 0.7; }
   </style>
 </head>
-
 <body>
-  <div id="startOverlay">
-    <button id="startButton">Tik om AR met geluid te starten</button>
+  <div id="loading-screen">
+    <div class="loading-title">De moed om het Zwarte Schaap te zijn</div>
+    <div class="loading-sub">Words of Wholeness</div>
+    <div id="loading-hint">Camera wordt gestart&hellip;</div>
+  </div>
+  <div id="chapter-label"></div>
+  <div id="hint">Richt de camera op een markering in het boek</div>
+  <div id="video-overlay">
+    <video id="fullscreen-video" playsinline webkit-playsinline></video>
+    <div id="tap-btn" style="display:none; position:fixed; inset:0; z-index:650; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);">
+      <button onclick="document.getElementById('fullscreen-video').play(); this.parentElement.style.display='none';" style="background:rgba(0,0,0,0.9); border:1px solid #c8a96e; color:#c8a96e; font-family:Georgia,serif; font-size:1rem; letter-spacing:4px; text-transform:uppercase; padding:24px 56px; border-radius:2px; cursor:pointer;">▶&nbsp;&nbsp;Tik om te starten</button>
+    </div>
+    <div id="close-btn">✕</div>
+    <div id="video-chapter"></div>
   </div>
 
-  <div id="hint">Richt je camera op de markering in het boek</div>
-
   <a-scene
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false;"
-    vr-mode-ui="enabled: false">
-
-    <a-assets>
-      <video id="vid1" src="https://wowbooks.github.io/zwarte-schaap/zs001.mp4"
-        preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
-      <video id="vid2" src="https://wowbooks.github.io/zwarte-schaap/zs002.mp4"
-        preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
-      <video id="vid3" src="https://wowbooks.github.io/zwarte-schaap/zs003.mp4"
-        preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
-      <video id="vid4" src="https://wowbooks.github.io/zwarte-schaap/zs004.mp4"
-        preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
-    </a-assets>
-
-    <a-marker type="pattern" url="https://wowbooks.github.io/zwarte-schaap/zs001.patt" id="m1">
-      <a-video src="#vid1" width="1.6" height="0.9" position="0 0.1 0" rotation="-90 0 0"></a-video>
-    </a-marker>
-
-    <a-marker type="pattern" url="https://wowbooks.github.io/zwarte-schaap/zs002.patt" id="m2">
-      <a-video src="#vid2" width="1.6" height="0.9" position="0 0.1 0" rotation="-90 0 0"></a-video>
-    </a-marker>
-
-    <a-marker type="pattern" url="https://wowbooks.github.io/zwarte-schaap/zs003.patt" id="m3">
-      <a-video src="#vid3" width="1.6" height="0.9" position="0 0.1 0" rotation="-90 0 0"></a-video>
-    </a-marker>
-
-    <a-marker type="pattern" url="https://wowbooks.github.io/zwarte-schaap/zs004.patt" id="m4">
-      <a-video src="#vid4" width="1.6" height="0.9" position="0 0.1 0" rotation="-90 0 0"></a-video>
-    </a-marker>
-
-    <a-entity camera></a-entity>
+    mindar-image="imageTargetSrc: https://wowbooks.github.io/zwarte-schaap/targets.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
+    color-space="sRGB"
+    renderer="colorManagement: true; antialias: false"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+    <a-assets></a-assets>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-entity mindar-image-target="targetIndex: 0"><a-plane width="1" height="1" opacity="0" material="transparent: true"></a-plane></a-entity>
+    <a-entity mindar-image-target="targetIndex: 1"><a-plane width="1" height="1" opacity="0" material="transparent: true"></a-plane></a-entity>
+    <a-entity mindar-image-target="targetIndex: 2"><a-plane width="1" height="1" opacity="0" material="transparent: true"></a-plane></a-entity>
+    <a-entity mindar-image-target="targetIndex: 3"><a-plane width="1" height="1" opacity="0" material="transparent: true"></a-plane></a-entity>
   </a-scene>
 
   <script>
-    const startOverlay = document.getElementById('startOverlay');
-    const startButton = document.getElementById('startButton');
+    const labels = ['Video 1','Video 2','Video 3','Video 4'];
+    const videoSrc = [
+      'https://wowbooks.github.io/zwarte-schaap/zs001.mp4',
+      'https://wowbooks.github.io/zwarte-schaap/zs002.mp4',
+      'https://wowbooks.github.io/zwarte-schaap/zs003.mp4',
+      'https://wowbooks.github.io/zwarte-schaap/zs004.mp4'
+    ];
 
-    const markers = ['m1','m2','m3','m4'];
-    const videos  = ['vid1','vid2','vid3','vid4'];
+    const loading = document.getElementById('loading-screen');
+    const loadHint = document.getElementById('loading-hint');
+    const overlay = document.getElementById('video-overlay');
+    const fsVideo = document.getElementById('fullscreen-video');
+    const closeBtn = document.getElementById('close-btn');
+    const videoChapter = document.getElementById('video-chapter');
+    const chapterLabel = document.getElementById('chapter-label');
 
-    let soundUnlocked = false;
+    function hideLoading() { loading.classList.add('hidden'); }
 
-    startButton.addEventListener('click', async function () {
-      soundUnlocked = true;
-      startOverlay.style.display = 'none';
-      // Unlock audio op iOS door alle videos kort te starten
-      videos.forEach(id => {
-        const v = document.getElementById(id);
-        v.muted = false;
-        v.volume = 1;
-        v.play().catch(() => {});
-        v.pause();
-      });
-    });
+    function playFullscreen(index) {
+      fsVideo.src = videoSrc[index];
+      overlay.classList.add('active');
+      videoChapter.textContent = labels[index];
+      chapterLabel.textContent = labels[index];
+      chapterLabel.classList.add('visible');
+      const tapBtn = document.getElementById('tap-btn');
+      tapBtn.style.cssText = 'display:flex; position:fixed; inset:0; z-index:650; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);';
+      fsVideo.play().then(() => {
+        tapBtn.style.display = 'none';
+      }).catch(e => {});
+    }
 
-    markers.forEach(function(mid, i) {
-      const marker = document.getElementById(mid);
-      const vid = document.getElementById(videos[i]);
+    function stopFullscreen() {
+      fsVideo.pause(); fsVideo.src = '';
+      overlay.classList.remove('active');
+      chapterLabel.classList.remove('visible');
+    }
 
-      marker.addEventListener('markerFound', function () {
-        if (soundUnlocked) vid.muted = false;
-        vid.play().catch(() => {});
-      });
+    closeBtn.addEventListener('click', stopFullscreen);
 
-      marker.addEventListener('markerLost', function () {
-        vid.pause();
-      });
-    });
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+      .then(s => { s.getTracks().forEach(t => t.stop()); loadHint.textContent = 'AR wordt geladen…'; })
+      .catch(e => {});
+
+    const sceneEl = document.querySelector('a-scene');
+    sceneEl.addEventListener('arReady', () => { hideLoading(); });
+    setTimeout(() => { if (!loading.classList.contains('hidden')) { hideLoading(); }}, 8000);
+
+    for (let i = 0; i < 4; i++) {
+      document.querySelector(`[mindar-image-target="targetIndex: ${i}"]`)
+        .addEventListener('targetFound', () => {
+          if (!overlay.classList.contains('active')) playFullscreen(i);
+        });
+    }
   </script>
 </body>
 </html>

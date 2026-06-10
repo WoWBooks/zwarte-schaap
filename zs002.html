@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Video 2 AR – Zwarte Schaap</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: black; }
+        #play-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; cursor: pointer;
+            font-family: Georgia, serif; color: #c8a96e;
+            font-size: clamp(16px, 4vw, 24px); text-transform: uppercase; letter-spacing: .2em;
+            opacity: 1; transition: opacity 0.6s ease;
+        }
+        #play-overlay.hidden { opacity: 0; pointer-events: none; }
+        #play-button {
+            width: 80px; height: 80px; border: 2px solid #c8a96e; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+        }
+        #play-button svg { fill: #c8a96e; margin-left: 8px; width: 30px; height: 30px; }
+        #hint-text { font-size: 13px; color: rgba(200,169,110,0.6); margin-top: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="play-overlay">
+        <div id="play-button">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <span>Tik om video te starten</span>
+        <div id="hint-text">Richt je camera op de markering in het boek</div>
+    </div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <a-marker type="pattern" url="https://wowbooks.github.io/zwarte-schaap/zs002.patt">
+            <a-video src="#video-asset" width="1.77" height="1" rotation="0 0 0" position="0 0 0"></a-video>
+        </a-marker>
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <video id="video-asset" src="https://wowbooks.github.io/zwarte-schaap/zs002.mp4"
+        preload="auto" loop="false" playsinline webkit-playsinline style="display:none;"></video>
+
+    <script>
+        const playOverlay = document.getElementById('play-overlay');
+        const videoAsset = document.getElementById('video-asset');
+        const scene = document.querySelector('a-scene');
+
+        playOverlay.addEventListener('click', () => {
+            videoAsset.play();
+            playOverlay.classList.add('hidden');
+        });
+
+        scene.addEventListener('markerFound', () => {
+            if (playOverlay.classList.contains('hidden')) videoAsset.play();
+        });
+        scene.addEventListener('markerLost', () => { videoAsset.pause(); });
+
+        videoAsset.muted = true;
+        videoAsset.play().catch(() => { playOverlay.classList.remove('hidden'); });
+    </script>
+</body>
+</html>

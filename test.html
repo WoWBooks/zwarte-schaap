@@ -16,23 +16,26 @@
     #startOverlay {
       position: fixed; inset: 0; z-index: 999999;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.72); color: #D4AF37; font-family: Georgia, serif;
+      background: rgba(0,0,0,0.9); color: #D4AF37; font-family: Georgia, serif;
+      text-align: center; padding: 24px;
     }
     #startButton {
       border: 1px solid rgba(212,175,55,0.85); border-radius: 999px;
       background: rgba(0,0,0,0.86); color: #f5d76e;
-      padding: 16px 22px; font-family: Georgia, serif; font-size: 18px;
+      padding: 16px 28px; font-family: Georgia, serif; font-size: 18px;
     }
   </style>
 </head>
 <body>
+
   <div id="startOverlay">
-    <button id="startButton">Tik om AR te starten</button>
+    <button id="startButton">Tik om camera te starten</button>
   </div>
 
   <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
     <a-assets>
-      <video id="vid1" src="https://wowbooks.github.io/zwarte-schaap/zs001.mp4"
+      <video id="vid1"
+        src="https://wowbooks.github.io/zwarte-schaap/zs001.mp4"
         preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
     </a-assets>
 
@@ -44,12 +47,20 @@
   </a-scene>
 
   <script>
-    const startOverlay = document.getElementById('startOverlay');
     const startButton = document.getElementById('startButton');
+    const startOverlay = document.getElementById('startOverlay');
     const vid = document.getElementById('vid1');
     const marker = document.getElementById('m1');
 
-    startButton.addEventListener('click', function () {
+    startButton.addEventListener('click', async function () {
+      // iOS: eerst camera toestemming vragen via getUserMedia
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        stream.getTracks().forEach(t => t.stop()); // stop preview stream, AR.js pakt hem daarna zelf
+      } catch(e) {
+        alert('Camera toegang geweigerd: ' + e.message);
+        return;
+      }
       startOverlay.style.display = 'none';
       vid.muted = false;
       vid.volume = 1;

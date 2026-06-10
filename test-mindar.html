@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>MindAR Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    .a-enter-vr { display: none !important; }
+    #startOverlay {
+      position: fixed; inset: 0; z-index: 999999;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.9);
+    }
+    #startButton {
+      border: 1px solid rgba(212,175,55,0.85); border-radius: 999px;
+      background: rgba(0,0,0,0.86); color: #f5d76e;
+      padding: 16px 28px; font-family: Georgia, serif; font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="startOverlay">
+    <button id="startButton">Tik om AR te starten</button>
+  </div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: https://wowbooks.github.io/zwarte-schaap/targets.mind; autoStart: false;"
+    embedded
+    vr-mode-ui="enabled: false"
+    renderer="logarithmicDepthBuffer: true;">
+
+    <a-assets>
+      <video id="vid1"
+        src="https://wowbooks.github.io/zwarte-schaap/zs001.mp4"
+        preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous">
+      </video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-video src="#vid1" width="1.6" height="0.9" position="0 0 0" rotation="0 0 0"></a-video>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    const startButton = document.getElementById('startButton');
+    const startOverlay = document.getElementById('startOverlay');
+    const vid = document.getElementById('vid1');
+    const sceneEl = document.querySelector('a-scene');
+
+    startButton.addEventListener('click', async function () {
+      startOverlay.style.display = 'none';
+      const arSystem = sceneEl.systems['mindar-image-system'];
+      arSystem.start();
+
+      sceneEl.addEventListener('targetFound', function () {
+        vid.muted = false;
+        vid.play().catch(() => {});
+      });
+      sceneEl.addEventListener('targetLost', function () {
+        vid.pause();
+      });
+    });
+  </script>
+</body>
+</html>

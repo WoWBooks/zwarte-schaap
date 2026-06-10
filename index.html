@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>De moed om het Zwarte Schaap te zijn – AR</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: Georgia, serif; }
+    a-scene { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; }
+    #loading-screen { position: fixed; inset: 0; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 1s ease; }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
+    .loading-title { color: #c8a96e; font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; text-align: center; padding: 0 32px; margin-bottom: 8px; }
+    .loading-sub { color: #c8a96e; font-size: 0.65rem; letter-spacing: 3px; opacity: 0.5; margin-bottom: 40px; }
+    #hint { position: fixed; bottom: 40px; left: 0; right: 0; text-align: center; color: #c8a96e; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; z-index: 100; opacity: 0.8; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loading-title">De moed om het Zwarte Schaap te zijn</div>
+    <div class="loading-sub">Words of Wholeness</div>
+    <div id="loading-hint">Camera wordt gestart&hellip;</div>
+  </div>
+  <div id="hint">Richt de camera op een markering in het boek</div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: https://wowbooks.github.io/zwarte-schaap/targets.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
+    color-space="sRGB"
+    renderer="colorManagement: true; antialias: false"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+
+    <a-assets>
+      <video id="vid1" src="https://wowbooks.github.io/zwarte-schaap/zs001.mp4" playsinline webkit-playsinline crossorigin="anonymous" loop></video>
+      <video id="vid2" src="https://wowbooks.github.io/zwarte-schaap/zs002.mp4" playsinline webkit-playsinline crossorigin="anonymous" loop></video>
+      <video id="vid3" src="https://wowbooks.github.io/zwarte-schaap/zs003.mp4" playsinline webkit-playsinline crossorigin="anonymous" loop></video>
+      <video id="vid4" src="https://wowbooks.github.io/zwarte-schaap/zs004.mp4" playsinline webkit-playsinline crossorigin="anonymous" loop></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0" id="t0">
+      <a-video src="#vid1" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 1" id="t1">
+      <a-video src="#vid2" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 2" id="t2">
+      <a-video src="#vid3" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
+    </a-entity>
+    <a-entity mindar-image-target="targetIndex: 3" id="t3">
+      <a-video src="#vid4" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    const loading = document.getElementById('loading-screen');
+    const sceneEl = document.querySelector('a-scene');
+
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+      .then(s => { s.getTracks().forEach(t => t.stop()); })
+      .catch(e => {});
+
+    sceneEl.addEventListener('arReady', () => { loading.classList.add('hidden'); });
+    setTimeout(() => { loading.classList.add('hidden'); }, 8000);
+
+    const vids = ['vid1','vid2','vid3','vid4'];
+    for (let i = 0; i < 4; i++) {
+      const target = document.getElementById('t' + i);
+      const vid = document.getElementById(vids[i]);
+      target.addEventListener('targetFound', () => { vid.play().catch(() => {}); });
+      target.addEventListener('targetLost',  () => { vid.pause(); });
+    }
+  </script>
+</body>
+</html>

@@ -19,7 +19,24 @@
     #laadscherm .titel { font-size: 10px; letter-spacing: 0.25em; color: rgba(200,168,74,0.5); text-transform: uppercase; margin-bottom: 1.5rem; }
     #laadscherm p { font-size: 14px; color: #c8b890; font-style: italic; line-height: 1.8; margin-bottom: 2rem; }
     #laadscherm button { background: transparent; border: 0.5px solid rgba(200,168,74,0.5); color: rgba(200,168,74,0.9); font-family: Georgia, serif; font-size: 11px; letter-spacing: 0.2em; padding: 14px 32px; cursor: pointer; text-transform: uppercase; }
-    #herhaal { position: fixed; bottom: 2rem; right: 1.5rem; background: rgba(0,0,0,0.6); border: 0.5px solid rgba(200,168,74,0.3); color: rgba(200,168,74,0.6); font-family: Georgia, serif; font-size: 10px; letter-spacing: 0.15em; padding: 8px 16px; cursor: pointer; text-transform: uppercase; z-index: 999; display: none; }
+    #herhaal {
+      position: fixed;
+      bottom: 1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      border: 0.5px solid rgba(200,168,74,0.3);
+      color: rgba(200,168,74,0.5);
+      font-family: Georgia, serif;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      padding: 6px 14px;
+      cursor: pointer;
+      text-transform: uppercase;
+      z-index: 999;
+      display: none;
+      border-radius: 20px;
+    }
   </style>
 </head>
 <body>
@@ -43,9 +60,9 @@
       src="https://wowbooks.github.io/zwarte-schaap/zs003.mp4"
       preload="auto" playsinline webkit-playsinline crossorigin="anonymous" loop></video>
   </a-assets>
-  <a-marker preset="hiro" id="marker">
+  <a-marker preset="hiro" id="marker" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
     <a-video src="#vid"
-      width="1.8" height="3.2"
+      width="2.1" height="3.7"
       position="0 0.5 0"
       rotation="-90 0 0"
       opacity="0"

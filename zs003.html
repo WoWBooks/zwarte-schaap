@@ -20,22 +20,11 @@
     #laadscherm p { font-size: 14px; color: #c8b890; font-style: italic; line-height: 1.8; margin-bottom: 2rem; }
     #laadscherm button { background: transparent; border: 0.5px solid rgba(200,168,74,0.5); color: rgba(200,168,74,0.9); font-family: Georgia, serif; font-size: 11px; letter-spacing: 0.2em; padding: 14px 32px; cursor: pointer; text-transform: uppercase; }
     #herhaal {
-      position: fixed;
-      bottom: 1.2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.5);
-      border: 0.5px solid rgba(200,168,74,0.3);
-      color: rgba(200,168,74,0.5);
-      font-family: Georgia, serif;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      padding: 6px 14px;
-      cursor: pointer;
-      text-transform: uppercase;
-      z-index: 999;
-      display: none;
-      border-radius: 20px;
+      position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.5); border: 0.5px solid rgba(200,168,74,0.3);
+      color: rgba(200,168,74,0.5); font-family: Georgia, serif; font-size: 9px;
+      letter-spacing: 0.15em; padding: 6px 14px; cursor: pointer;
+      text-transform: uppercase; z-index: 999; display: none; border-radius: 20px;
     }
   </style>
 </head>
@@ -61,8 +50,8 @@
       preload="auto" playsinline webkit-playsinline crossorigin="anonymous" loop></video>
   </a-assets>
   <a-marker preset="hiro" id="marker" smooth="true" smoothCount="10" smoothTolerance="0.01" smoothThreshold="5">
-    <a-video src="#vid"
-      width="2.1" height="3.7"
+    <a-video id="arvid" src="#vid"
+      width="1.8" height="3.2"
       position="0 0.5 0"
       rotation="-90 0 0"
       opacity="0"
@@ -82,6 +71,22 @@
   <a-entity camera></a-entity>
 </a-scene>
 <script>
+  // Schermgrootte aanpassen
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const w = isAndroid ? 1.4 : 1.8;
+  const h = isAndroid ? 2.5 : 3.2;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const arvid = document.getElementById('arvid');
+    arvid.setAttribute('width', w);
+    arvid.setAttribute('height', h);
+
+    const marker = document.getElementById('marker');
+    const vid = document.getElementById('vid');
+    marker.addEventListener('markerFound', () => { vid.play().catch(() => {}); });
+    marker.addEventListener('markerLost', () => { vid.pause(); });
+  });
+
   function startAR() {
     document.getElementById('laadscherm').style.opacity = '0';
     setTimeout(() => {
@@ -90,12 +95,6 @@
       document.getElementById('herhaal').style.display = 'block';
     }, 1000);
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    const marker = document.getElementById('marker');
-    const vid = document.getElementById('vid');
-    marker.addEventListener('markerFound', () => { vid.play().catch(() => {}); });
-    marker.addEventListener('markerLost', () => { vid.pause(); });
-  });
 </script>
 </body>
 </html>
